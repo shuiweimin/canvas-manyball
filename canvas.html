@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .cvs {
+            display: block;
+            margin: 100px auto;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 1. 不能再css中声明canvas的宽和高 内容会变形 -->
+    <canvas class="cvs" width="600" height="600">
+        您的浏览器不支持canvas!
+    </canvas>
+    <script>
+        // 1.获取cvs
+        var cvs = document.querySelector('.cvs');
+        // 2. 获取上下文对象
+        var ctx = cvs.getContext('2d');
+        // 3.执行绘画  eAngle单位是弧度
+        // ctx.arc(x,y,r,sAngle,eAngle,counterclockwise);
+
+        function Ball(x, y, r, cvs) {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.cvs = cvs;
+            this.ctx = cvs.getContext('2d');
+            this.init();
+        }
+        Ball.prototype = {
+            init: function () {
+                // 初始化 运动的向量 
+                this.stepX = this.rdStep();
+                this.stepY = this.rdStep();
+                this.color = this.rdColor();
+                this.draw();
+                // this.play();
+
+            },
+            draw: function () {
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
+                this.ctx.fillStyle = this.color;
+                this.ctx.fill();
+                this.ctx.closePath();
+            },
+            move: function () {
+                // 修正step
+                if (this.r + this.x > this.cvs.width) {
+                    this.stepX = -1 * Math.abs(this.stepX);
+                }
+                if (this.r + this.y > this.cvs.height) {
+                    this.stepY = -1 * Math.abs(this.stepY);
+                }
+                if (this.x < this.r) {
+                    this.stepX = Math.abs(this.stepX);
+                }
+                if (this.y < this.r) {
+                    this.stepY = Math.abs(this.stepY);
+                }
+                // 2.改变x,y
+                this.x += this.stepX;
+                this.y += this.stepY;
+                // 3. 执行绘画
+                this.draw();
+            },
+            rdColor() {
+                // 0-255
+                function rd() {
+                    return Math.floor(Math.random() * 256);
+                }
+                return 'rgb(' + rd() + ',' + rd() + ',' + rd() + ')';
+            },
+            //随机方向
+            rdStep() {
+                return Math.random() * 11;
+            }
+        }
+
+
+        var balls = [];
+        for (var i = 0; i < 100; i++) {
+            balls.push(new Ball(0, 0, Math.floor(Math.random() * 41 + 10), cvs));
+        }
+
+        //执行动画
+        setInterval(function () {
+            ctx.clearRect(0,0,cvs.width,cvs.height);
+            for (var i = 0; i < balls.length; i++) {
+                balls[i].move();
+            }
+        }, 17)
+
+    </script>
+</body>
+
+</html>
